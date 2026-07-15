@@ -15,7 +15,67 @@ const DEFAULT_FINANCE = { currentBalance: null, credit: null, fixed: null, extra
 const K = { s:'ct.s', r:'ct.r', a:'ct.a', f:'ct.f' };
 const load = (k,d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-const money = n => new Intl.NumberFormat('he-IL',{style:'currency',currency:'ILS',maximumFractionDigits:0}).format(Number(n)||0);
+const money = value => {
+  const amount = Number(value) || 0;
+  const hasAgorot = Math.abs(amount - Math.round(amount)) > 0.000001;
+  return new Intl.NumberFormat('he-IL',{
+    style:'currency',
+    currency:'ILS',
+    minimumFractionDigits: hasAgorot ? 2 : 0,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
+
+function parseDecimalInput(value){
+  let text = String(value ?? '')
+    .trim()
+    .replace(/[₪\s\u00A0]/g,'')
+    .replace(/[’']/g,'');
+
+  if(text === '') return null;
+
+  const commaCount = (text.match(/,/g) || []).length;
+  const dotCount = (text.match(/\./g) || []).length;
+
+  if(commaCount > 0 && dotCount > 0){
+    // The last separator is treated as the decimal separator.
+    const decimalSeparator = text.lastIndexOf(',') > text.lastIndexOf('.') ? ',' : '.';
+    const thousandsSeparator = decimalSeparator === ',' ? '.' : ',';
+    text = text.split(thousandsSeparator).join('');
+    text = text.replace(decimalSeparator,'.');
+  }else if(commaCount > 0){
+    const parts = text.split(',');
+    if(commaCount === 1 && parts[1].length <= 2){
+      text = `${parts[0]}.${parts[1]}`;
+    }else{
+      text = parts.join('');
+    }
+  }else if(dotCount > 0){
+    const parts = text.split('.');
+    if(dotCount === 1 && parts[1].length <= 2){
+      // Already a decimal dot.
+    }else if(dotCount === 1 && parts[1].length === 3){
+      // Common thousands separator, e.g. 1.500
+      text = parts.join('');
+    }else if(dotCount > 1){
+      const lastPart = parts.at(-1);
+      if(lastPart.length <= 2){
+        text = `${parts.slice(0,-1).join('')}.${lastPart}`;
+      }else{
+        text = parts.join('');
+      }
+    }
+  }
+
+  text = text.replace(/[^0-9.\-]/g,'');
+  const parsed = Number(text);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+const inputNumber = value => {
+  if(value === null || value === undefined || value === '') return '';
+  return String(Number(value));
+};
 const pad = n => String(n).padStart(2,'0');
 const dateStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const timeStr = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
@@ -131,12 +191,12 @@ window.addEventListener('DOMContentLoaded',()=>{
     el.todayIn.textContent=todayRow?.in || activeShift?.in || '--:--';
     el.todayOut.textContent=todayRow?.out || '--:--';
     el.todaySummary.textContent=todayRow ? `${presenceHours(todayRow).toFixed(1)} שעות נוכחות · ${paidHours(todayRow).toFixed(1)} שעות בתשלום` : activeShift ? 'משמרת פעילה' : 'טרם דווחה משמרת היום';
-    el.currentBalance.value=finance.currentBalance ?? '';
-    el.creditCurrent.value=finance.credit ?? '';
-    el.fixedExpenses.value=finance.fixed ?? '';
-    el.extraIncome.value=finance.extra ?? 0;
-    el.monthlyBudget.value=finance.monthlyBudget ?? 1500;
-    el.discretionarySpent.value=finance.discretionarySpent ?? 0;
+    el.currentBalance.value=inputNumber(finance.currentBalance);
+    el.creditCurrent.value=inputNumber(finance.credit);
+    el.fixedExpenses.value=inputNumber(finance.fixed);
+    el.extraIncome.value=inputNumber(finance.extra ?? 0);
+    el.monthlyBudget.value=inputNumber(finance.monthlyBudget ?? 1500);
+    el.discretionarySpent.value=inputNumber(finance.discretionarySpent ?? 0);
     el.bankExpected.textContent=ready?money(expected):'טרם הוזן';
     el.bankSpendable.textContent=money(remainingBudget);
     el.bankSpendable.classList.toggle('negative-value', remainingBudget < 0);
@@ -174,31 +234,40 @@ window.addEventListener('DOMContentLoaded',()=>{
   });
   el.financeForm.addEventListener('submit',event=>{
     event.preventDefault();
-    const currentValue=el.currentBalance.value.trim();
-    const creditValue=el.creditCurrent.value.trim();
-    const fixedValue=el.fixedExpenses.value.trim();
-    if(currentValue==='' || creditValue==='' || fixedValue===''){
-      alert('יש למלא יתרה נוכחית, אשראי והוצאות קבועות כדי לחשב את היתרה הצפויה.');
+    const currentValue=parseDecimalInput(el.currentBalance.value);
+    const creditValue=parseDecimalInput(el.creditCurrent.value);
+    const fixedValue=parseDecimalInput(el.fixedExpenses.value);
+    const extraValue=parseDecimalInput(el.extraIncome.value);
+    const budgetValue=parseDecimalInput(el.monthlyBudget.value);
+    const spentValue=parseDecimalInput(el.discretionarySpent.value);
+
+    if(currentValue===null || creditValue===null || fixedValue===null){
+      alert('יש למלא יתרה נוכחית, אשראי והוצאות קבועות. אפשר להזין אגורות עם נקודה או פסיק, לדוגמה 1234.56 או 1234,56.');
       return;
     }
+    if([extraValue,budgetValue,spentValue].some(value => value !== null && !Number.isFinite(value))){
+      alert('אחד הסכומים שהוזנו אינו תקין.');
+      return;
+    }
+
     finance={
-      currentBalance:Number(currentValue),
-      credit:Number(creditValue),
-      fixed:Number(fixedValue),
-      extra:Number(el.extraIncome.value||0),
-      monthlyBudget:Number(el.monthlyBudget.value||1500),
-      discretionarySpent:Number(el.discretionarySpent.value||0)
+      currentBalance:currentValue,
+      credit:creditValue,
+      fixed:fixedValue,
+      extra:extraValue ?? 0,
+      monthlyBudget:budgetValue ?? 1500,
+      discretionarySpent:spentValue ?? 0
     };
     save(K.f,finance); render();
   });
 
   const openSettings = () => {
-    el.setBase.value=settings.base;
-    el.setTravel.value=settings.travel;
-    el.setHours.value=settings.hours;
-    el.setPension.value=settings.pension;
-    el.setCreditPoints.value=settings.creditPoints;
-    el.setBreak.value=settings.breakMinutes;
+    el.setBase.value=inputNumber(settings.base);
+    el.setTravel.value=inputNumber(settings.travel);
+    el.setHours.value=inputNumber(settings.hours);
+    el.setPension.value=inputNumber(settings.pension);
+    el.setCreditPoints.value=inputNumber(settings.creditPoints);
+    el.setBreak.value=inputNumber(settings.breakMinutes);
     el.settingsOverlay.hidden=false;
     document.body.classList.add('modal-open');
     window.setTimeout(()=>el.setBase.focus(),0);
@@ -214,7 +283,17 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('keydown',event=>{ if(event.key==='Escape' && !el.settingsOverlay.hidden) closeSettingsModal(); });
   el.settingsForm.addEventListener('submit',event=>{
     event.preventDefault();
-    settings={...settings,base:Number(el.setBase.value),travel:Number(el.setTravel.value),hours:Number(el.setHours.value),pension:Number(el.setPension.value),creditPoints:Number(el.setCreditPoints.value),breakMinutes:Number(el.setBreak.value)};
+    const base=parseDecimalInput(el.setBase.value);
+    const travel=parseDecimalInput(el.setTravel.value);
+    const hours=parseDecimalInput(el.setHours.value);
+    const pension=parseDecimalInput(el.setPension.value);
+    const creditPoints=parseDecimalInput(el.setCreditPoints.value);
+    const breakMinutes=parseDecimalInput(el.setBreak.value);
+    if([base,travel,hours,pension,creditPoints,breakMinutes].some(value => value === null)){
+      alert('יש למלא את כל הגדרות השכר במספרים תקינים.');
+      return;
+    }
+    settings={...settings,base,travel,hours,pension,creditPoints,breakMinutes};
     save(K.s,settings); closeSettingsModal(); render();
   });
 
