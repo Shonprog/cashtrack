@@ -8,9 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CashTrack">
   <title>CashTrack</title>
-  <link rel="manifest" href="manifest.webmanifest?v=12">
-  <link rel="apple-touch-icon" href="icon-192.png?v=12">
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="manifest" href="manifest.webmanifest?v=14">
+  <link rel="apple-touch-icon" href="icon-192.png?v=14">
+  <link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body>
 <main class="phone-shell">
@@ -43,7 +43,31 @@
     <div class="clock-actions"><button id="clockInBtn" class="action green">כניסה ↪</button><button id="clockOutBtn" class="action dark">יציאה ↩</button></div>
     <div class="day-card"><div class="day-heading">היום</div><div id="todayDate" class="day-date"></div><div class="time-grid"><div><span>כניסה</span><strong id="todayIn">--:--</strong></div><div><span>יציאה</span><strong id="todayOut">--:--</strong></div></div><p id="todaySummary">טרם דווחה משמרת היום</p></div>
     <div class="summary-panel"><h3>סיכום החודש עד היום</h3><div class="summary-row"><span>שעות רגילות בתשלום</span><strong id="salaryRegularHours">0.0</strong></div><div class="summary-row"><span>שעות נוספות 125%</span><strong id="salaryOt125">0.0</strong></div><div class="summary-row"><span>שעות נוספות 150%</span><strong id="salaryOt150">0.0</strong></div><div class="summary-row total"><span>ברוטו שנצבר</span><strong id="salaryGrossToday">₪0</strong></div><div class="summary-row total"><span>נטו שנצבר</span><strong id="salaryNetToday">₪0</strong></div></div>
-    <div class="summary-panel"><h3>תחזית לסוף החודש</h3><div class="summary-row"><span>ברוטו צפוי</span><strong id="salaryGrossMonth">₪0</strong></div><div class="summary-row"><span>נטו צפוי</span><strong id="salaryNetMonth">₪0</strong></div></div>
+    <div class="summary-panel"><h3>תחזית לסוף החודש</h3><div class="summary-row"><span>ברוטו צפוי</span><strong id="salaryGrossMonth">₪0</strong></div><div class="summary-row"><span>נטו צפוי</span><strong id="salaryNetMonth">₪0</strong></div><p id="salaryNetNote" class="field-note salary-note">הנטו הוא הערכה.</p></div>
+
+    <div class="summary-panel">
+      <h3>הגדרות תלוש לחודש הנבחר</h3>
+      <form id="monthlySalaryForm" class="form-grid">
+        <label class="wide-field">פנסיה בחודש הזה
+          <select id="monthlyPensionMode">
+            <option value="default">ברירת המחדל מההגדרות</option>
+            <option value="zero">ללא פנסיה החודש — 0%</option>
+            <option value="custom">אחוז מותאם לחודש הזה</option>
+          </select>
+        </label>
+        <label id="monthlyPensionCustomWrap" class="wide-field" hidden>אחוז פנסיה מותאם
+          <input id="monthlyPensionCustom" type="text" inputmode="decimal" autocomplete="off" placeholder="למשל 3 או 6">
+        </label>
+        <label>נטו ידני לחודש, לא חובה
+          <input id="monthlyManualNet" type="text" inputmode="decimal" autocomplete="off" placeholder="למשל 9700">
+        </label>
+        <label>ניכוי פנסיה רטרו, לא חובה
+          <input id="monthlyRetroPension" type="text" inputmode="decimal" autocomplete="off" placeholder="0">
+        </label>
+        <p id="monthlySalaryNote" class="field-note wide-field">ההגדרות האלה חלות רק על החודש הנבחר.</p>
+        <button class="save-btn wide-field" type="submit">שמור הגדרות תלוש לחודש</button>
+      </form>
+    </div>
     <div class="summary-panel"><h3>הוספת יום ידנית</h3><form id="manualForm" class="form-grid"><label>תאריך<input id="manualDate" type="date" required></label><label>כניסה<input id="manualIn" type="time" value="08:00" required></label><label>יציאה<input id="manualOut" type="time" value="17:00" required></label><label>הפסקה בדקות<input id="manualBreak" type="number" value="30" min="0"></label><button class="save-btn" type="submit">שמור יום עבודה</button></form></div>
     <div class="summary-panel"><h3>ימי עבודה</h3><div id="recordsList" class="records-list"></div></div>
   </section>
@@ -63,6 +87,38 @@
         <p id="monthFinanceNote" class="field-note">הסכומים נשמרים בנפרד לכל חודש.</p>
         <button class="save-btn" type="submit">שמור נתוני בסיס</button>
       </form>
+    </div>
+
+    <div class="summary-panel screenshot-import-panel">
+      <div class="section-head">
+        <div>
+          <h3>ייבוא עסקאות מצילום מסך</h3>
+          <small>הצילום נבדק במכשיר שלך. לפני ההוספה אפשר לתקן כל עסקה.</small>
+        </div>
+        <span class="mini-tag neutral">נדרש אינטרנט לזיהוי</span>
+      </div>
+      <label class="file-picker">
+        <input id="screenshotFiles" type="file" accept="image/*" multiple>
+        <span>📷 בחר צילום אחד או כמה צילומים</span>
+      </label>
+      <div id="screenshotThumbs" class="screenshot-thumbs"></div>
+      <button id="analyzeScreenshotsBtn" class="add-btn import-action" type="button">זהה עסקאות בצילומים</button>
+      <div id="ocrStatus" class="ocr-status" aria-live="polite" hidden>
+        <div class="progress-track"><div id="ocrProgressBar" class="progress-bar"></div></div>
+        <span id="ocrStatusText">מכין את הזיהוי…</span>
+      </div>
+      <div id="importPreview" class="import-preview" hidden>
+        <div class="preview-head">
+          <strong>עסקאות שנמצאו</strong>
+          <button id="addPreviewRowBtn" type="button" class="small-action">＋ הוסף שורה</button>
+        </div>
+        <p class="field-note">עסקה מתאריך ישן, למשל תשלום בעסקת תשלומים, תיכלל בחודש שבחרת באפליקציה אך תשמור את תאריך העסקה המקורי.</p>
+        <div id="importPreviewRows" class="import-preview-rows"></div>
+        <div class="preview-actions">
+          <button id="clearImportBtn" type="button" class="secondary-btn">נקה</button>
+          <button id="confirmImportBtn" type="button" class="save-btn">הוסף את העסקאות המסומנות</button>
+        </div>
+      </div>
     </div>
 
     <div class="summary-panel">
@@ -116,6 +172,6 @@
     </form>
   </section>
 </div>
-<div class="version-label" aria-hidden="true">v12</div>
-<script src="app.js?v=12" defer></script>
+<div class="version-label" aria-hidden="true">v14</div>
+<script src="app.js?v=14" defer></script>
 </body></html>

@@ -60,3 +60,60 @@ select{width:100%;margin-top:7px;padding:13px;border-radius:13px;border:1px soli
 .month-center strong{font-size:15px}.month-center small{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.25}.month-center.past-month{border-color:rgba(61,222,130,.24);background:rgba(61,222,130,.07)}
 .action:disabled{opacity:.35;filter:saturate(.4);cursor:not-allowed;box-shadow:none}
 @media(max-width:370px){.month-switcher{grid-template-columns:42px minmax(0,1fr) 42px}.month-center strong{font-size:14px}.month-center small{font-size:9px}}
+
+
+/* v13 — monthly salary controls */
+.salary-note {
+  margin-top: 12px;
+}
+.form-grid .wide-field {
+  grid-column: 1 / -1;
+}
+.form-grid select {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(116, 235, 174, .13);
+  border-radius: 12px;
+  background: #06130d;
+  color: #f3fff8;
+  padding: 0 12px;
+  font: inherit;
+}
+[hidden] {
+  display: none !important;
+}
+
+
+/* v14 — screenshot transaction import */
+.screenshot-import-panel{overflow:hidden}
+.file-picker{display:block}
+.file-picker input{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px}
+.file-picker span{display:flex;align-items:center;justify-content:center;min-height:50px;padding:12px;border:1px dashed rgba(116,235,174,.35);border-radius:14px;background:rgba(61,222,130,.06);color:var(--green2);font-size:13px;font-weight:800;cursor:pointer}
+.screenshot-thumbs{display:flex;gap:9px;overflow-x:auto;margin:10px 0}
+.screenshot-thumbs:empty{display:none}
+.screenshot-thumbs figure{flex:0 0 84px;margin:0}
+.screenshot-thumbs img{width:84px;height:110px;object-fit:cover;border-radius:12px;border:1px solid var(--line);display:block}
+.screenshot-thumbs figcaption{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:9px;margin-top:4px;direction:ltr;text-align:left}
+.import-action{width:100%;margin-top:8px}
+.import-action:disabled{opacity:.4}
+.ocr-status{margin-top:12px;padding:11px;border-radius:12px;background:rgba(255,255,255,.035);color:var(--muted);font-size:11px}
+.progress-track{height:7px;border-radius:999px;background:#06110c;overflow:hidden;margin-bottom:7px}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--green),#8bf2b4);transition:width .2s ease}
+.import-preview{margin-top:14px}
+.preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.small-action,.secondary-btn{border:1px solid var(--line);border-radius:11px;padding:9px 11px;background:rgba(255,255,255,.04);color:var(--text)}
+.import-preview-rows{display:grid;gap:10px;margin-top:11px}
+.import-edit-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.025)}
+.import-edit-row.duplicate-row{border-color:rgba(255,190,92,.28);background:rgba(255,190,92,.035)}
+.import-select-line{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between}
+.compact-check{padding:7px 9px}
+.import-note,.import-warning,.duplicate-warning{grid-column:1/-1;font-size:10px;line-height:1.45}
+.import-note{color:var(--muted)}
+.import-warning{color:#ffcc75}
+.duplicate-warning{color:#ffbd68}
+.preview-actions{display:grid;grid-template-columns:1fr 2fr;gap:9px;margin-top:12px}
+.preview-actions .save-btn{grid-column:auto}
+@media(max-width:370px){
+  .import-edit-row{grid-template-columns:1fr}
+  .import-select-line,.import-edit-row .wide-field,.import-note,.import-warning,.duplicate-warning{grid-column:1}
+}
