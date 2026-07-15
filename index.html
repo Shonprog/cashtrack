@@ -1,22 +1,121 @@
-<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07130e"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="CashTrack"><title>CashTrack</title><link rel="manifest" href="manifest.webmanifest?v=9"><link rel="apple-touch-icon" href="icon-192.png?v=9"><link rel="stylesheet" href="styles.css?v=9"></head><body><main class="phone-shell"><header class="app-header">
-  <button id="settingsBtn" type="button" class="header-icon settings-trigger" aria-label="פתיחת הגדרות" title="הגדרות">⚙</button>
-  <div class="brand">CashTrack</div>
-  <div class="header-spacer" aria-hidden="true"></div>
-</header><section id="homePage" class="page active"><h2 class="page-title">סקירה כללית</h2><div class="metric-card"><div class="metric-icon">💼</div><div><span>נטו שנצבר עד היום</span><strong id="homeNetToday">₪0</strong></div></div><div class="metric-card"><div class="metric-icon">📅</div><div><span>נטו צפוי בתלוש הקרוב</span><strong id="homeNetMonth">₪0</strong><small>עד יום 10 לחודש</small></div></div><div class="metric-card"><div class="metric-icon">💳</div><div><span>אשראי נוכחי</span><strong id="homeCredit">₪0</strong></div></div><div class="metric-card"><div class="metric-icon">🏦</div><div><span>יתרה צפויה אחרי המשכורת</span><strong id="homeExpectedBalance">₪0</strong></div></div><div class="spend-card"><div><span>נשאר מתקציב הבזבוזים החודשי</span><strong id="homeSpendable">₪0</strong></div><div class="pig">🐷</div><small id="homeBudgetText">תקציב חודשי: ₪1,500</small></div></section><section id="salaryPage" class="page"><h2 class="page-title">שכר</h2><div class="clock-actions"><button id="clockInBtn" class="action green">כניסה ↪</button><button id="clockOutBtn" class="action dark">יציאה ↩</button></div><div class="day-card"><div class="day-heading">היום</div><div id="todayDate" class="day-date"></div><div class="time-grid"><div><span>כניסה</span><strong id="todayIn">--:--</strong></div><div><span>יציאה</span><strong id="todayOut">--:--</strong></div></div><p id="todaySummary">טרם דווחה משמרת היום</p></div><div class="summary-panel"><h3>סיכום החודש עד היום</h3><div class="summary-row"><span>שעות רגילות בתשלום</span><strong id="salaryRegularHours">0.0</strong></div><div class="summary-row"><span>שעות נוספות 125%</span><strong id="salaryOt125">0.0</strong></div><div class="summary-row"><span>שעות נוספות 150%</span><strong id="salaryOt150">0.0</strong></div><div class="summary-row total"><span>ברוטו שנצבר</span><strong id="salaryGrossToday">₪0</strong></div><div class="summary-row total"><span>נטו שנצבר</span><strong id="salaryNetToday">₪0</strong></div></div><div class="summary-panel"><h3>תחזית לסוף החודש</h3><div class="summary-row"><span>ברוטו צפוי</span><strong id="salaryGrossMonth">₪0</strong></div><div class="summary-row"><span>נטו צפוי</span><strong id="salaryNetMonth">₪0</strong></div></div><div class="summary-panel"><h3>הוספת יום ידנית</h3><form id="manualForm" class="form-grid"><label>תאריך<input id="manualDate" type="date" required></label><label>כניסה<input id="manualIn" type="time" value="08:00" required></label><label>יציאה<input id="manualOut" type="time" value="17:00" required></label><label>הפסקה בדקות<input id="manualBreak" type="number" value="30" min="0"></label><button class="save-btn" type="submit">שמור יום עבודה</button></form></div><div class="summary-panel"><h3>ימי עבודה</h3><div id="recordsList" class="records-list"></div></div></section><section id="bankPage" class="page"><h2 class="page-title">עו״ש</h2><div class="summary-panel"><h3>הזנת נתונים</h3><form id="financeForm" class="form-grid"><label>יתרה נוכחית בעו״ש<input id="currentBalance" type="text" inputmode="decimal" autocomplete="off" step="0.01"></label><label>אשראי שצבר<input id="creditCurrent" type="text" inputmode="decimal" autocomplete="off" step="0.01"></label><label>הוצאות קבועות שעוד ירדו<input id="fixedExpenses" type="text" inputmode="decimal" autocomplete="off" step="0.01"></label><label>הכנסה נוספת נטו<input id="extraIncome" type="text" inputmode="decimal" autocomplete="off" step="0.01" placeholder="הסכום שנכנס בפועל לחשבון"></label><label>תקציב חודשי לבזבוזים<input id="monthlyBudget" type="text" inputmode="decimal" autocomplete="off" step="0.01" placeholder="1500"></label><label>בזבוזים החודש עד עכשיו<input id="discretionarySpent" type="text" inputmode="decimal" autocomplete="off" step="0.01" placeholder="כמה נוצל מהתקציב"></label><p class="field-note">הכנסה נוספת מחושבת כנטו. הבזבוזים משמשים רק למעקב מול התקציב ואינם מופחתים שוב מהעו״ש, כי הם כבר כלולים בדרך כלל באשראי.</p><button class="save-btn" type="submit">שמור ועדכן</button></form></div><div class="summary-panel"><h3>חישוב</h3><div class="summary-row"><span>יתרה צפויה אחרי המשכורת</span><strong id="bankExpected">₪0</strong></div><div class="summary-row"><span>נשאר מתקציב הבזבוזים</span><strong class="green-text" id="bankSpendable">₪0</strong></div><div class="summary-row"><span>צפי שינוי בעו״ש</span><strong id="bankGrowth">₪0</strong></div></div></section><nav class="bottom-nav"><button data-page="homePage" class="nav-item active">⌂<span>סקירה</span></button><button data-page="salaryPage" class="nav-item">₪<span>שכר</span></button><button data-page="bankPage" class="nav-item">🏦<span>עו״ש</span></button></nav></main><div id="settingsOverlay" class="modal-overlay" hidden>
-  <section class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="settings-head">
-      <h3 id="settingsTitle">הגדרות שכר</h3>
-      <button type="button" id="closeSettings" class="modal-close" aria-label="סגירת הגדרות">✕</button>
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#07130e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="CashTrack">
+  <title>CashTrack</title>
+  <link rel="manifest" href="manifest.webmanifest?v=12">
+  <link rel="apple-touch-icon" href="icon-192.png?v=12">
+  <link rel="stylesheet" href="styles.css?v=12">
+</head>
+<body>
+<main class="phone-shell">
+  <header class="app-header">
+    <button id="settingsBtn" type="button" class="header-icon settings-trigger" aria-label="פתיחת הגדרות" title="הגדרות">⚙</button>
+    <div class="brand">CashTrack</div>
+    <div class="header-spacer" aria-hidden="true"></div>
+  </header>
+
+  <div class="month-switcher" aria-label="בחירת חודש">
+    <button id="prevMonthBtn" type="button" aria-label="חודש קודם">‹</button>
+    <button id="goCurrentMonthBtn" type="button" class="month-center">
+      <strong id="monthLabel">החודש הנוכחי</strong>
+      <small id="monthHint">הנתונים נשמרים לפי חודש</small>
+    </button>
+    <button id="nextMonthBtn" type="button" aria-label="חודש הבא">›</button>
+  </div>
+
+  <section id="homePage" class="page active">
+    <h2 class="page-title">סקירה כללית</h2>
+    <div class="metric-card"><div class="metric-icon">💼</div><div><span>נטו שנצבר עד היום</span><strong id="homeNetToday">₪0</strong></div></div>
+    <div class="metric-card"><div class="metric-icon">📅</div><div><span>נטו צפוי בתלוש הקרוב</span><strong id="homeNetMonth">₪0</strong><small>עד יום 10 לחודש</small></div></div>
+    <div class="metric-card"><div class="metric-icon">💳</div><div><span>סה״כ חיוב אשראי</span><strong id="homeCredit">טרם הוזן</strong></div></div>
+    <div class="metric-card"><div class="metric-icon">🏦</div><div><span>יתרה צפויה אחרי המשכורת</span><strong id="homeExpectedBalance">טרם הוזן</strong></div></div>
+    <div class="spend-card"><div><span>נשאר מתקציב הבזבוזים החודשי</span><strong id="homeSpendable">₪0</strong></div><div class="pig">🐷</div><small id="homeBudgetText">תקציב חודשי: ₪1,500</small></div>
+  </section>
+
+  <section id="salaryPage" class="page">
+    <h2 class="page-title">שכר</h2>
+    <div class="clock-actions"><button id="clockInBtn" class="action green">כניסה ↪</button><button id="clockOutBtn" class="action dark">יציאה ↩</button></div>
+    <div class="day-card"><div class="day-heading">היום</div><div id="todayDate" class="day-date"></div><div class="time-grid"><div><span>כניסה</span><strong id="todayIn">--:--</strong></div><div><span>יציאה</span><strong id="todayOut">--:--</strong></div></div><p id="todaySummary">טרם דווחה משמרת היום</p></div>
+    <div class="summary-panel"><h3>סיכום החודש עד היום</h3><div class="summary-row"><span>שעות רגילות בתשלום</span><strong id="salaryRegularHours">0.0</strong></div><div class="summary-row"><span>שעות נוספות 125%</span><strong id="salaryOt125">0.0</strong></div><div class="summary-row"><span>שעות נוספות 150%</span><strong id="salaryOt150">0.0</strong></div><div class="summary-row total"><span>ברוטו שנצבר</span><strong id="salaryGrossToday">₪0</strong></div><div class="summary-row total"><span>נטו שנצבר</span><strong id="salaryNetToday">₪0</strong></div></div>
+    <div class="summary-panel"><h3>תחזית לסוף החודש</h3><div class="summary-row"><span>ברוטו צפוי</span><strong id="salaryGrossMonth">₪0</strong></div><div class="summary-row"><span>נטו צפוי</span><strong id="salaryNetMonth">₪0</strong></div></div>
+    <div class="summary-panel"><h3>הוספת יום ידנית</h3><form id="manualForm" class="form-grid"><label>תאריך<input id="manualDate" type="date" required></label><label>כניסה<input id="manualIn" type="time" value="08:00" required></label><label>יציאה<input id="manualOut" type="time" value="17:00" required></label><label>הפסקה בדקות<input id="manualBreak" type="number" value="30" min="0"></label><button class="save-btn" type="submit">שמור יום עבודה</button></form></div>
+    <div class="summary-panel"><h3>ימי עבודה</h3><div id="recordsList" class="records-list"></div></div>
+  </section>
+
+  <section id="bankPage" class="page">
+    <h2 class="page-title">עו״ש ואשראי</h2>
+
+    <div class="summary-panel">
+      <h3>נתוני בסיס לחודש</h3>
+      <form id="financeForm" class="form-grid">
+        <label>יתרה נוכחית בעו״ש<input id="currentBalance" type="text" inputmode="decimal" autocomplete="off" placeholder="למשל 3200.50"></label>
+        <label>חיוב אשראי שכבר קיים<input id="creditBase" type="text" inputmode="decimal" autocomplete="off" placeholder="למשל 4000"></label>
+        <label>הוצאות קבועות אחרות<input id="fixedBase" type="text" inputmode="decimal" autocomplete="off" placeholder="סכום שלא מופיע ברשימה"></label>
+        <label>הכנסה נוספת נטו<input id="extraIncome" type="text" inputmode="decimal" autocomplete="off" placeholder="הסכום שנכנס בפועל"></label>
+        <label>תקציב חודשי לבזבוזים<input id="monthlyBudget" type="text" inputmode="decimal" autocomplete="off" placeholder="1500"></label>
+        <label>בזבוזים קודמים בתקציב<input id="budgetBaseSpent" type="text" inputmode="decimal" autocomplete="off" placeholder="מה שכבר הוצאת לפני שהתחלת לרשום"></label>
+        <p id="monthFinanceNote" class="field-note">הסכומים נשמרים בנפרד לכל חודש.</p>
+        <button class="save-btn" type="submit">שמור נתוני בסיס</button>
+      </form>
     </div>
+
+    <div class="summary-panel">
+      <div class="section-head"><div><h3>הוספת הוצאה לאשראי</h3><small>כל הוצאה חדשה מתווספת לסכום הקיים</small></div><strong id="creditTotalBadge" class="amount-badge">₪0</strong></div>
+      <form id="creditExpenseForm" class="transaction-form">
+        <label class="wide-field">תיאור ההוצאה<input id="creditDescription" type="text" maxlength="60" placeholder="למשל סופר, דלק או מסעדה" required></label>
+        <label>סכום<input id="creditAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="100" required></label>
+        <label>תאריך<input id="creditDate" type="date" required></label>
+        <label class="check-row wide-field"><input id="creditCountsBudget" type="checkbox" checked><span>לחשב את ההוצאה בתוך תקציב הבזבוזים</span></label>
+        <button class="add-btn wide-field" type="submit">＋ הוסף הוצאה</button>
+      </form>
+      <div id="creditExpensesList" class="ledger-list"></div>
+    </div>
+
+    <div class="summary-panel">
+      <div class="section-head"><div><h3>הוראות קבע ותשלומים קבועים</h3><small>הסכומים מתווספים אוטומטית בכל חישוב חודשי</small></div><strong id="recurringTotalBadge" class="amount-badge">₪0</strong></div>
+      <form id="recurringForm" class="transaction-form">
+        <label class="wide-field">שם התשלום<input id="recurringName" type="text" maxlength="60" placeholder="למשל טלפון, ביטוח או חדר כושר" required></label>
+        <label>סכום חודשי<input id="recurringAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="99.90" required></label>
+        <label>יום חיוב בחודש<input id="recurringDay" type="number" min="1" max="31" placeholder="10"></label>
+        <label class="wide-field">סוג<select id="recurringType"><option value="standing">הוראת קבע</option><option value="fixed">תשלום קבוע</option><option value="other">אחר</option></select></label>
+        <button class="add-btn wide-field" type="submit">＋ הוסף תשלום קבוע</button>
+      </form>
+      <div id="recurringList" class="ledger-list"></div>
+    </div>
+
+    <div class="summary-panel">
+      <h3>חישוב מעודכן</h3>
+      <div class="summary-row"><span>סה״כ אשראי</span><strong id="bankCreditTotal">טרם הוזן</strong></div>
+      <div class="summary-row"><span>סה״כ הוצאות קבועות</span><strong id="bankFixedTotal">₪0</strong></div>
+      <div class="summary-row"><span>יתרה צפויה אחרי המשכורת</span><strong id="bankExpected">טרם הוזן</strong></div>
+      <div class="summary-row"><span>נשאר מתקציב הבזבוזים</span><strong class="green-text" id="bankSpendable">₪0</strong></div>
+      <div class="summary-row"><span>צפי שינוי בעו״ש</span><strong id="bankGrowth">טרם הוזן</strong></div>
+    </div>
+  </section>
+
+  <nav class="bottom-nav"><button data-page="homePage" class="nav-item active">⌂<span>סקירה</span></button><button data-page="salaryPage" class="nav-item">₪<span>שכר</span></button><button data-page="bankPage" class="nav-item">🏦<span>עו״ש</span></button></nav>
+</main>
+
+<div id="settingsOverlay" class="modal-overlay" hidden>
+  <section class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="settings-head"><h3 id="settingsTitle">הגדרות שכר</h3><button type="button" id="closeSettings" class="modal-close" aria-label="סגירת הגדרות">✕</button></div>
     <form id="settingsForm" class="settings-modal">
       <label>שכר בסיס<input id="setBase" type="text" inputmode="decimal" autocomplete="off"></label>
       <label>נסיעות<input id="setTravel" type="text" inputmode="decimal" autocomplete="off"></label>
       <label>שעות תקן חודשיות<input id="setHours" type="text" inputmode="decimal" autocomplete="off"></label>
-      <label>פנסיית עובד (%)<input id="setPension" type="text" inputmode="decimal" autocomplete="off" step="0.1" inputmode="decimal"></label>
-      <label>נקודות זיכוי<input id="setCreditPoints" type="text" inputmode="decimal" autocomplete="off" step="0.25" inputmode="decimal"></label>
+      <label>פנסיית עובד (%)<input id="setPension" type="text" inputmode="decimal" autocomplete="off"></label>
+      <label>נקודות זיכוי<input id="setCreditPoints" type="text" inputmode="decimal" autocomplete="off"></label>
       <label>הפסקה אוטומטית בדקות<input id="setBreak" type="number" inputmode="numeric"></label>
       <button type="submit" class="save-btn">שמירת הגדרות</button>
     </form>
   </section>
 </div>
-<div class="version-label" aria-hidden="true">v9</div><script src="app.js?v=9" defer></script></body></html>
+<div class="version-label" aria-hidden="true">v12</div>
+<script src="app.js?v=12" defer></script>
+</body></html>
