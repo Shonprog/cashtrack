@@ -11,7 +11,7 @@ const DEFAULT_SETTINGS = {
   niHigh: 0.1217,
   tax: [[7010,.1],[10060,.14],[16150,.2],[22440,.31],[46690,.35],[60130,.47],[1e9,.5]]
 };
-const DEFAULT_FINANCE = { currentBalance: null, credit: null, fixed: null, extra: 0, minimum: 1000 };
+const DEFAULT_FINANCE = { currentBalance: null, credit: null, fixed: null, extra: 0, monthlyBudget: 1500, discretionarySpent: 0 };
 const K = { s:'ct.s', r:'ct.r', a:'ct.a', f:'ct.f' };
 const load = (k,d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
@@ -21,6 +21,9 @@ const dateStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate(
 const timeStr = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 let settings = {...DEFAULT_SETTINGS, ...load(K.s,{})};
 let finance = {...DEFAULT_FINANCE, ...load(K.f,{})};
+// Migration from older versions that used a minimum checking-balance target.
+if (finance.monthlyBudget == null) finance.monthlyBudget = 1500;
+if (finance.discretionarySpent == null) finance.discretionarySpent = 0;
 let records = load(K.r,[]);
 let activeShift = load(K.a,null);
 
@@ -92,28 +95,31 @@ function upsert(row){
 window.addEventListener('DOMContentLoaded',()=>{
   const $ = id => document.getElementById(id);
   const el = {
-    settingsBtn:$('settingsBtn'), settingsDialog:$('settingsDialog'), closeSettings:$('closeSettings'), settingsForm:$('settingsForm'),
+    settingsBtn:$('settingsBtn'), settingsOverlay:$('settingsOverlay'), closeSettings:$('closeSettings'), settingsForm:$('settingsForm'),
     setBase:$('setBase'), setTravel:$('setTravel'), setHours:$('setHours'), setPension:$('setPension'), setCreditPoints:$('setCreditPoints'), setBreak:$('setBreak'),
-    homeNetToday:$('homeNetToday'), homeNetMonth:$('homeNetMonth'), homeCredit:$('homeCredit'), homeExpectedBalance:$('homeExpectedBalance'), homeSpendable:$('homeSpendable'), homeMinimumText:$('homeMinimumText'),
+    homeNetToday:$('homeNetToday'), homeNetMonth:$('homeNetMonth'), homeCredit:$('homeCredit'), homeExpectedBalance:$('homeExpectedBalance'), homeSpendable:$('homeSpendable'), homeBudgetText:$('homeBudgetText'),
     salaryRegularHours:$('salaryRegularHours'), salaryOt125:$('salaryOt125'), salaryOt150:$('salaryOt150'), salaryGrossToday:$('salaryGrossToday'), salaryNetToday:$('salaryNetToday'), salaryGrossMonth:$('salaryGrossMonth'), salaryNetMonth:$('salaryNetMonth'),
     todayDate:$('todayDate'), todayIn:$('todayIn'), todayOut:$('todayOut'), todaySummary:$('todaySummary'),
-    currentBalance:$('currentBalance'), creditCurrent:$('creditCurrent'), fixedExpenses:$('fixedExpenses'), extraIncome:$('extraIncome'), minimumBalance:$('minimumBalance'), bankExpected:$('bankExpected'), bankSpendable:$('bankSpendable'),
+    currentBalance:$('currentBalance'), creditCurrent:$('creditCurrent'), fixedExpenses:$('fixedExpenses'), extraIncome:$('extraIncome'), monthlyBudget:$('monthlyBudget'), discretionarySpent:$('discretionarySpent'), bankExpected:$('bankExpected'), bankSpendable:$('bankSpendable'), bankGrowth:$('bankGrowth'),
     recordsList:$('recordsList'), clockInBtn:$('clockInBtn'), clockOutBtn:$('clockOutBtn'), manualForm:$('manualForm'), manualDate:$('manualDate'), manualIn:$('manualIn'), manualOut:$('manualOut'), manualBreak:$('manualBreak'), financeForm:$('financeForm')
   };
 
   function render(){
     const c=calculate();
     const ready=finance.currentBalance!==null && finance.credit!==null && finance.fixed!==null;
+    // Extra income is treated as NET cash received.
     const expected=ready ? Number(finance.currentBalance)+c.netMonth+Number(finance.extra||0)-Number(finance.credit)-Number(finance.fixed) : 0;
-    const spendable=ready ? expected-Number(finance.minimum||0) : 0;
+    const remainingBudget=Number(finance.monthlyBudget||0)-Number(finance.discretionarySpent||0);
+    const checkingGrowth=ready ? expected-Number(finance.currentBalance) : 0;
     const now=new Date(), today=dateStr(now), todayRow=c.rows.find(x=>x.date===today);
 
     el.homeNetToday.textContent=money(c.net);
     el.homeNetMonth.textContent=money(c.netMonth);
     el.homeCredit.textContent=finance.credit===null?'טרם הוזן':money(finance.credit);
     el.homeExpectedBalance.textContent=ready?money(expected):'טרם הוזן';
-    el.homeSpendable.textContent=ready?money(Math.max(0,spendable)):'טרם הוזן';
-    el.homeMinimumText.textContent=`יעד מינימום בעו״ש: ${money(finance.minimum)}`;
+    el.homeSpendable.textContent=money(remainingBudget);
+    el.homeSpendable.classList.toggle('negative-value', remainingBudget < 0);
+    el.homeBudgetText.textContent=remainingBudget >= 0 ? `תקציב חודשי: ${money(finance.monthlyBudget)}` : `חריגה של ${money(Math.abs(remainingBudget))} מהתקציב`;
     el.salaryRegularHours.textContent=c.regular.toFixed(1);
     el.salaryOt125.textContent=c.ot125.toFixed(1);
     el.salaryOt150.textContent=c.ot150.toFixed(1);
@@ -129,9 +135,14 @@ window.addEventListener('DOMContentLoaded',()=>{
     el.creditCurrent.value=finance.credit ?? '';
     el.fixedExpenses.value=finance.fixed ?? '';
     el.extraIncome.value=finance.extra ?? 0;
-    el.minimumBalance.value=finance.minimum ?? 1000;
+    el.monthlyBudget.value=finance.monthlyBudget ?? 1500;
+    el.discretionarySpent.value=finance.discretionarySpent ?? 0;
     el.bankExpected.textContent=ready?money(expected):'טרם הוזן';
-    el.bankSpendable.textContent=ready?money(Math.max(0,spendable)):'טרם הוזן';
+    el.bankSpendable.textContent=money(remainingBudget);
+    el.bankSpendable.classList.toggle('negative-value', remainingBudget < 0);
+    el.bankGrowth.textContent=ready?money(checkingGrowth):'טרם הוזן';
+    el.bankGrowth.classList.toggle('negative-value', ready && checkingGrowth < 0);
+    el.bankGrowth.classList.toggle('positive-value', ready && checkingGrowth >= 0);
 
     el.recordsList.innerHTML=c.rows.length?'':'<div class="record"><small>אין דיווחים החודש</small></div>';
     [...c.rows].reverse().forEach(row=>{
@@ -163,23 +174,55 @@ window.addEventListener('DOMContentLoaded',()=>{
   });
   el.financeForm.addEventListener('submit',event=>{
     event.preventDefault();
-    finance={currentBalance:Number(el.currentBalance.value),credit:Number(el.creditCurrent.value),fixed:Number(el.fixedExpenses.value),extra:Number(el.extraIncome.value||0),minimum:Number(el.minimumBalance.value||1000)};
+    const currentValue=el.currentBalance.value.trim();
+    const creditValue=el.creditCurrent.value.trim();
+    const fixedValue=el.fixedExpenses.value.trim();
+    if(currentValue==='' || creditValue==='' || fixedValue===''){
+      alert('יש למלא יתרה נוכחית, אשראי והוצאות קבועות כדי לחשב את היתרה הצפויה.');
+      return;
+    }
+    finance={
+      currentBalance:Number(currentValue),
+      credit:Number(creditValue),
+      fixed:Number(fixedValue),
+      extra:Number(el.extraIncome.value||0),
+      monthlyBudget:Number(el.monthlyBudget.value||1500),
+      discretionarySpent:Number(el.discretionarySpent.value||0)
+    };
     save(K.f,finance); render();
   });
 
-  el.settingsBtn.addEventListener('click',()=>{
-    el.setBase.value=settings.base; el.setTravel.value=settings.travel; el.setHours.value=settings.hours; el.setPension.value=settings.pension; el.setCreditPoints.value=settings.creditPoints; el.setBreak.value=settings.breakMinutes;
-    if(typeof el.settingsDialog.showModal==='function') el.settingsDialog.showModal(); else el.settingsDialog.setAttribute('open','');
-  });
-  el.closeSettings.addEventListener('click',()=>el.settingsDialog.close());
-  el.settingsDialog.addEventListener('click',event=>{ if(event.target===el.settingsDialog) el.settingsDialog.close(); });
+  const openSettings = () => {
+    el.setBase.value=settings.base;
+    el.setTravel.value=settings.travel;
+    el.setHours.value=settings.hours;
+    el.setPension.value=settings.pension;
+    el.setCreditPoints.value=settings.creditPoints;
+    el.setBreak.value=settings.breakMinutes;
+    el.settingsOverlay.hidden=false;
+    document.body.classList.add('modal-open');
+    window.setTimeout(()=>el.setBase.focus(),0);
+  };
+  const closeSettingsModal = () => {
+    el.settingsOverlay.hidden=true;
+    document.body.classList.remove('modal-open');
+  };
+  el.settingsBtn.addEventListener('click', openSettings);
+  el.settingsBtn.addEventListener('touchend', event => { event.preventDefault(); openSettings(); }, {passive:false});
+  el.closeSettings.addEventListener('click', closeSettingsModal);
+  el.settingsOverlay.addEventListener('click',event=>{ if(event.target===el.settingsOverlay) closeSettingsModal(); });
+  document.addEventListener('keydown',event=>{ if(event.key==='Escape' && !el.settingsOverlay.hidden) closeSettingsModal(); });
   el.settingsForm.addEventListener('submit',event=>{
     event.preventDefault();
     settings={...settings,base:Number(el.setBase.value),travel:Number(el.setTravel.value),hours:Number(el.setHours.value),pension:Number(el.setPension.value),creditPoints:Number(el.setCreditPoints.value),breakMinutes:Number(el.setBreak.value)};
-    save(K.s,settings); el.settingsDialog.close(); render();
+    save(K.s,settings); closeSettingsModal(); render();
   });
 
   el.manualDate.value=dateStr(new Date());
   render();
-  if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.error);
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(regs=>Promise.all(regs.map(reg=>reg.unregister()))).finally(()=>{
+      if('caches' in window) caches.keys().then(keys=>Promise.all(keys.map(key=>caches.delete(key))));
+    });
+  }
 });
